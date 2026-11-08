@@ -38,23 +38,15 @@ class SpeechService {
 
   Future<void> startListening({
     required String localeId,
-    required void Function(
-      String text,
-      bool isFinal,
-    ) onResult,
+    required void Function(String text, bool isFinal) onResult,
   }) async {
     if (!_initialized || !_speech.isAvailable) {
-      throw Exception(
-        'Speech recognition is not available.',
-      );
+      throw Exception('Speech recognition is not available.');
     }
 
     await _speech.listen(
       onResult: (result) {
-        onResult(
-          result.recognizedWords,
-          result.finalResult,
-        );
+        onResult(result.recognizedWords, result.finalResult);
       },
       listenOptions: SpeechListenOptions(
         partialResults: true,

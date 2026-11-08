@@ -42,6 +42,8 @@ dependencies:
   camera: ^0.12.2
   image_picker: ^1.2.0
   google_mlkit_text_recognition: ^0.15.0
+  http_parser: ^4.1.2
+  audioplayers: ^6.8.1
 
 dev_dependencies:
   flutter_test:
@@ -59,13 +61,11 @@ dev_dependencies:
 
 # The following section is specific to Flutter packages.
 flutter:
-  # Include the Material Icons font.
   uses-material-design: true
 
-  # Avatar images
   assets:
     - assets/avatar/avatar.jpg
-
+    - assets/avatar/expressions/
   # To add assets to your application, add an assets section, like this:
   # assets:
   #   - images/a_dot_burr.jpeg

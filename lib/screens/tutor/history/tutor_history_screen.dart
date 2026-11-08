@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 
 import '../../../services/tutor_history_service.dart';
@@ -8,13 +7,11 @@ class TutorHistoryScreen extends StatefulWidget {
   const TutorHistoryScreen({super.key});
 
   @override
-  State<TutorHistoryScreen> createState() =>
-      _TutorHistoryScreenState();
+  State<TutorHistoryScreen> createState() => _TutorHistoryScreenState();
 }
 
 class _TutorHistoryScreenState extends State<TutorHistoryScreen> {
-  final TutorHistoryService _historyService =
-      TutorHistoryService();
+  final TutorHistoryService _historyService = TutorHistoryService();
 
   List<Map<String, dynamic>> _conversations = [];
 
@@ -34,8 +31,7 @@ class _TutorHistoryScreenState extends State<TutorHistoryScreen> {
     });
 
     try {
-      final conversations =
-          await _historyService.getConversations();
+      final conversations = await _historyService.getConversations();
 
       if (!mounted) return;
 
@@ -53,9 +49,7 @@ class _TutorHistoryScreenState extends State<TutorHistoryScreen> {
     }
   }
 
-  Future<void> _deleteConversation(
-    Map<String, dynamic> conversation,
-  ) async {
+  Future<void> _deleteConversation(Map<String, dynamic> conversation) async {
     final id = conversation['id'] as String;
 
     final confirmed = await showDialog<bool>(
@@ -68,17 +62,12 @@ class _TutorHistoryScreenState extends State<TutorHistoryScreen> {
           ),
           actions: [
             TextButton(
-              onPressed: () =>
-                  Navigator.pop(dialogContext, false),
+              onPressed: () => Navigator.pop(dialogContext, false),
               child: const Text('Cancel'),
             ),
             TextButton(
-              onPressed: () =>
-                  Navigator.pop(dialogContext, true),
-              child: const Text(
-                'Delete',
-                style: TextStyle(color: Colors.red),
-              ),
+              onPressed: () => Navigator.pop(dialogContext, true),
+              child: const Text('Delete', style: TextStyle(color: Colors.red)),
             ),
           ],
         );
@@ -93,23 +82,16 @@ class _TutorHistoryScreenState extends State<TutorHistoryScreen> {
       if (!mounted) return;
 
       setState(() {
-        _conversations.removeWhere(
-          (item) => item['id'] == id,
-        );
+        _conversations.removeWhere((item) => item['id'] == id);
       });
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Conversation deleted.'),
-        ),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('Conversation deleted.')));
     } catch (error) {
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Unable to delete conversation: $error'),
-        ),
+        SnackBar(content: Text('Unable to delete conversation: $error')),
       );
     }
   }
@@ -143,10 +125,7 @@ class _TutorHistoryScreenState extends State<TutorHistoryScreen> {
       appBar: AppBar(
         title: const Text(
           'Conversation History',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 18,
-          ),
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
         ),
         backgroundColor: Colors.white,
         foregroundColor: const Color(0xFF172B4D),
@@ -166,9 +145,7 @@ class _TutorHistoryScreenState extends State<TutorHistoryScreen> {
   Widget _buildBody() {
     if (_isLoading) {
       return const Center(
-        child: CircularProgressIndicator(
-          color: Color(0xFF3478F6),
-        ),
+        child: CircularProgressIndicator(color: Color(0xFF3478F6)),
       );
     }
 
@@ -179,11 +156,7 @@ class _TutorHistoryScreenState extends State<TutorHistoryScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(
-                Icons.error_outline,
-                color: Colors.red,
-                size: 45,
-              ),
+              const Icon(Icons.error_outline, color: Colors.red, size: 45),
               const SizedBox(height: 12),
               const Text('Unable to load conversations'),
               const SizedBox(height: 8),
@@ -235,9 +208,7 @@ class _TutorHistoryScreenState extends State<TutorHistoryScreen> {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(
-                      builder: (_) => const AiTutorScreen(),
-                    ),
+                    MaterialPageRoute(builder: (_) => const AiTutorScreen()),
                   ).then((_) => _loadConversations());
                 },
                 icon: const Icon(Icons.add),
@@ -254,24 +225,19 @@ class _TutorHistoryScreenState extends State<TutorHistoryScreen> {
       child: ListView.separated(
         padding: const EdgeInsets.all(16),
         itemCount: _conversations.length,
-        separatorBuilder: (_, _) =>
-            const SizedBox(height: 10),
+        separatorBuilder: (_, _) => const SizedBox(height: 10),
         itemBuilder: (context, index) {
           final conversation = _conversations[index];
 
           final id = conversation['id'] as String;
-          final title =
-              conversation['title']?.toString() ??
-              'New conversation';
+          final title = conversation['title']?.toString() ?? 'New conversation';
 
           return Card(
             elevation: 0,
             color: Colors.white,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(14),
-              side: const BorderSide(
-                color: Color(0xFFEAEFF5),
-              ),
+              side: const BorderSide(color: Color(0xFFEAEFF5)),
             ),
             child: ListTile(
               contentPadding: const EdgeInsets.symmetric(
@@ -280,10 +246,7 @@ class _TutorHistoryScreenState extends State<TutorHistoryScreen> {
               ),
               leading: const CircleAvatar(
                 backgroundColor: Color(0xFFE8F0FF),
-                child: Icon(
-                  Icons.smart_toy_outlined,
-                  color: Color(0xFF3478F6),
-                ),
+                child: Icon(Icons.smart_toy_outlined, color: Color(0xFF3478F6)),
               ),
               title: Text(
                 title,
@@ -298,28 +261,19 @@ class _TutorHistoryScreenState extends State<TutorHistoryScreen> {
                 padding: const EdgeInsets.only(top: 6),
                 child: Text(
                   _formatDate(conversation['updated_at']),
-                  style: const TextStyle(
-                    color: Colors.grey,
-                    fontSize: 12,
-                  ),
+                  style: const TextStyle(color: Colors.grey, fontSize: 12),
                 ),
               ),
               trailing: IconButton(
                 tooltip: 'Delete',
-                onPressed: () =>
-                    _deleteConversation(conversation),
-                icon: const Icon(
-                  Icons.delete_outline,
-                  color: Colors.redAccent,
-                ),
+                onPressed: () => _deleteConversation(conversation),
+                icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
               ),
               onTap: () {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => AiTutorScreen(
-                      conversationId: id,
-                    ),
+                    builder: (_) => AiTutorScreen(conversationId: id),
                   ),
                 ).then((_) => _loadConversations());
               },

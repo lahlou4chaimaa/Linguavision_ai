@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 
 import '../../services/auth_service.dart';
@@ -42,9 +41,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       _confirmPasswordController.clear();
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Password updated successfully.'),
-        ),
+        const SnackBar(content: Text('Password updated successfully.')),
       );
     } catch (error) {
       if (!mounted) return;
@@ -66,9 +63,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final user = _authService.currentUser;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Settings'),
-      ),
+      appBar: AppBar(title: const Text('Settings')),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
         child: Column(
@@ -175,9 +170,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   FilledButton(
                     onPressed: _isLoading ? null : _changePassword,
                     child: _isLoading
-                        ? const CircularProgressIndicator(
-                            color: Colors.white,
-                          )
+                        ? const CircularProgressIndicator(color: Colors.white)
                         : const Text('Update password'),
                   ),
                 ],

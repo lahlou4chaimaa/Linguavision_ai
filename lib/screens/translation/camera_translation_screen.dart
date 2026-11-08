@@ -1,11 +1,13 @@
+import 'dart:async';
+import 'dart:convert';
+import 'dart:typed_data';
 
-import 'package:flutter/foundation.dart';
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_tts/flutter_tts.dart';
-import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
+import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
 import 'package:image_picker/image_picker.dart';
 
-import '../../services/ai_tutor_service.dart';
 import '../../services/learning_service.dart';
 
 class CameraTranslationScreen extends StatefulWidget {
@@ -18,17 +20,26 @@ class CameraTranslationScreen extends StatefulWidget {
 
 class _CameraTranslationScreenState extends State<CameraTranslationScreen> {
   // --------------------------------------------------
+  // CONFIGURATION
+  // --------------------------------------------------
+
+  static const String _baseUrl = String.fromEnvironment(
+    'API_BASE_URL',
+    defaultValue: 'http://127.0.0.1:8000',
+  );
+
+  static const Color _primaryBlue = Color(0xFF356AE6);
+  static const Color _darkBlue = Color(0xFF172B4D);
+
+  // --------------------------------------------------
   // SERVICES
   // --------------------------------------------------
 
-  final AiTutorService _aiTutorService = AiTutorService();
   final LearningService _learningService = LearningService();
-  final FlutterTts _tts = FlutterTts();
   final ImagePicker _picker = ImagePicker();
+  final AudioPlayer _audioPlayer = AudioPlayer();
 
-  final TextRecognizer _textRecognizer = TextRecognizer(
-    script: TextRecognitionScript.latin,
-  );
+  StreamSubscription<void>? _audioCompleteSubscription;
 
   // --------------------------------------------------
   // IMAGE
@@ -58,82 +69,87 @@ class _CameraTranslationScreenState extends State<CameraTranslationScreen> {
   bool _isTranslating = false;
   bool _isSpeaking = false;
 
+  @override
+  void initState() {
+    super.initState();
+
+    _audioCompleteSubscription = _audioPlayer.onPlayerComplete.listen((_) {
+      if (!mounted) return;
+
+      setState(() {
+        _isSpeaking = false;
+      });
+    });
+  }
+
   // --------------------------------------------------
-  // TAKE PHOTO
+  // IMAGE SELECTION
   // --------------------------------------------------
+
+  Future<void> _selectImage(ImageSource source) async {
+    try {
+      final image = await _picker.pickImage(source: source, imageQuality: 90);
+
+      if (image == null || !mounted) return;
+
+      final bytes = await image.readAsBytes();
+
+      await _stopAudio();
+
+      if (!mounted) return;
+
+      setState(() {
+        _selectedImage = image;
+        _imageBytes = bytes;
+        _recognizedText = '';
+        _translatedText = '';
+      });
+    } catch (error) {
+      _showMessage('Image selection error: $error');
+    }
+  }
 
   Future<void> _takePhoto() async {
-    try {
-      final image = await _picker.pickImage(
-        source: ImageSource.camera,
-        imageQuality: 90,
-      );
-
-      if (image == null || !mounted) return;
-
-      final bytes = await image.readAsBytes();
-
-      await _tts.stop();
-
-      if (!mounted) return;
-
-      setState(() {
-        _selectedImage = image;
-        _imageBytes = bytes;
-        _recognizedText = '';
-        _translatedText = '';
-        _isSpeaking = false;
-      });
-    } catch (error) {
-      _showMessage('Camera error: $error');
-    }
+    await _selectImage(ImageSource.camera);
   }
-
-  // --------------------------------------------------
-  // CHOOSE FROM GALLERY
-  // --------------------------------------------------
 
   Future<void> _chooseFromGallery() async {
-    try {
-      final image = await _picker.pickImage(
-        source: ImageSource.gallery,
-        imageQuality: 90,
-      );
+    await _selectImage(ImageSource.gallery);
+  }
 
-      if (image == null || !mounted) return;
+  // --------------------------------------------------
+  // IMAGE MIME TYPE
+  // --------------------------------------------------
 
-      final bytes = await image.readAsBytes();
+  MediaType _getImageMimeType(String fileName) {
+    final extension = fileName.split('.').last.toLowerCase();
 
-      await _tts.stop();
-
-      if (!mounted) return;
-
-      setState(() {
-        _selectedImage = image;
-        _imageBytes = bytes;
-        _recognizedText = '';
-        _translatedText = '';
-        _isSpeaking = false;
-      });
-    } catch (error) {
-      _showMessage('Gallery error: $error');
+    switch (extension) {
+      case 'png':
+        return MediaType('image', 'png');
+      case 'webp':
+        return MediaType('image', 'webp');
+      case 'jpg':
+      case 'jpeg':
+      default:
+        return MediaType('image', 'jpeg');
     }
   }
 
   // --------------------------------------------------
-  // OCR
+  // OCR THROUGH FASTAPI + EASYOCR
   // --------------------------------------------------
 
   Future<void> _processImage() async {
     final image = _selectedImage;
+    final bytes = _imageBytes;
 
-    if (image == null || _isProcessing) return;
+    if (image == null || bytes == null || _isProcessing) {
+      return;
+    }
 
-    // Google ML Kit Text Recognition does not support Flutter Web.
-    if (kIsWeb) {
-      _showMessage(
-        'Text recognition is available on Android, not Chrome.',
-      );
+    if (bytes.length > 10 * 1024 * 1024) {
+      _showMessage('Image too large. Maximum size is 10 MB.');
       return;
     }
 
@@ -144,25 +160,48 @@ class _CameraTranslationScreenState extends State<CameraTranslationScreen> {
     });
 
     try {
-      // On Android/iOS, ML Kit can read the selected image
-      // using its local file path.
-      final inputImage = InputImage.fromFilePath(image.path);
+      final uri = Uri.parse('$_baseUrl/api/ocr');
+      final request = http.MultipartRequest('POST', uri);
 
-      final RecognizedText result =
-          await _textRecognizer.processImage(inputImage);
+      request.files.add(
+        http.MultipartFile.fromBytes(
+          'file',
+          bytes,
+          filename: image.name,
+          contentType: _getImageMimeType(image.name),
+        ),
+      );
+
+      final streamedResponse = await request.send().timeout(
+        const Duration(seconds: 180),
+      );
+
+      final response = await http.Response.fromStream(streamedResponse);
+
+      final responseData = jsonDecode(response.body);
+
+      if (response.statusCode != 200) {
+        final detail = responseData is Map
+            ? responseData['detail']?.toString()
+            : null;
+
+        throw Exception(detail ?? 'Server error ${response.statusCode}');
+      }
+
+      final recognizedText = responseData['text']?.toString().trim() ?? '';
 
       if (!mounted) return;
 
       setState(() {
-        _recognizedText = result.text.trim();
+        _recognizedText = recognizedText;
         _isProcessing = false;
       });
 
-      if (_recognizedText.isEmpty) {
+      if (recognizedText.isEmpty) {
         _showMessage('No text was detected in this image.');
       }
     } catch (error) {
-      debugPrint('OCR error: $error');
+      debugPrint('EasyOCR error: $error');
 
       if (!mounted) return;
 
@@ -175,7 +214,17 @@ class _CameraTranslationScreenState extends State<CameraTranslationScreen> {
   }
 
   // --------------------------------------------------
-  // TRANSLATION
+  // LOAD TARGET LANGUAGE
+  // --------------------------------------------------
+
+  Future<String> _loadTargetLanguage() async {
+    final profile = await _learningService.getLearningProfile();
+
+    return profile?['target_language']?.toString() ?? 'English';
+  }
+
+  // --------------------------------------------------
+  // TRANSLATION THROUGH FASTAPI
   // --------------------------------------------------
 
   Future<void> _translateText() async {
@@ -189,10 +238,7 @@ class _CameraTranslationScreenState extends State<CameraTranslationScreen> {
     });
 
     try {
-      final profile = await _learningService.getLearningProfile();
-
-      final language =
-          profile?['target_language']?.toString() ?? 'English';
+      final language = await _loadTargetLanguage();
 
       if (!mounted) return;
 
@@ -200,37 +246,36 @@ class _CameraTranslationScreenState extends State<CameraTranslationScreen> {
         _targetLanguage = language;
       });
 
-      final prompt = '''
-You are a professional language translator.
+      final uri = Uri.parse('$_baseUrl/api/translate');
 
-Translate the following text into $language.
+      final response = await http
+          .post(
+            uri,
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({'text': text, 'target_language': language}),
+          )
+          .timeout(const Duration(seconds: 120));
 
-Instructions:
-- Return only the translated text.
-- Do not explain the translation.
-- Do not add introductions or conclusions.
-- Do not add quotation marks.
-- Preserve the original meaning.
-- Keep names, numbers and important details unchanged.
-- Preserve paragraph structure when possible.
+      final data = jsonDecode(response.body);
 
-Text to translate:
-$text
-''';
+      if (response.statusCode != 200) {
+        final detail = data is Map ? data['detail']?.toString() : null;
 
-      final translation = await _aiTutorService.sendMessage(
-        message: prompt,
-        history: const [],
-      );
+        throw Exception(
+          detail ?? 'Translation server error ${response.statusCode}',
+        );
+      }
+
+      final translation = data['translated_text']?.toString().trim() ?? '';
 
       if (!mounted) return;
 
       setState(() {
-        _translatedText = translation.trim();
+        _translatedText = translation;
         _isTranslating = false;
       });
 
-      if (_translatedText.isEmpty) {
+      if (translation.isEmpty) {
         _showMessage('The translation is empty.');
       }
     } catch (error) {
@@ -247,76 +292,78 @@ $text
   }
 
   // --------------------------------------------------
-  // TTS LANGUAGE
+  // STOP AUDIO
   // --------------------------------------------------
 
-  String _getTtsLocale(String language) {
-    const locales = {
-      'english': 'en-US',
-      'french': 'fr-FR',
-      'arabic': 'ar-SA',
-      'spanish': 'es-ES',
-      'german': 'de-DE',
-      'italian': 'it-IT',
-      'portuguese': 'pt-PT',
-      'chinese': 'zh-CN',
-      'japanese': 'ja-JP',
-      'korean': 'ko-KR',
-      'turkish': 'tr-TR',
-      'russian': 'ru-RU',
-      'dutch': 'nl-NL',
-    };
+  Future<void> _stopAudio() async {
+    try {
+      await _audioPlayer.stop();
+    } catch (error) {
+      debugPrint('Audio stop error: $error');
+    }
 
-    return locales[language.toLowerCase().trim()] ?? 'en-US';
+    if (!mounted) return;
+
+    setState(() {
+      _isSpeaking = false;
+    });
   }
 
   // --------------------------------------------------
-  // TEXT TO SPEECH
+  // NATURAL TEXT TO SPEECH THROUGH EDGE TTS
   // --------------------------------------------------
 
   Future<void> _speakTranslation() async {
-    if (_translatedText.trim().isEmpty) return;
+    final text = _translatedText.trim();
 
-    // Stop current speech
+    if (text.isEmpty) return;
+
     if (_isSpeaking) {
-      await _tts.stop();
-
-      if (!mounted) return;
-
-      setState(() {
-        _isSpeaking = false;
-      });
-
+      await _stopAudio();
       return;
     }
 
     try {
-      await _tts.stop();
-
-      await _tts.setLanguage(
-        _getTtsLocale(_targetLanguage),
-      );
-
-      await _tts.setSpeechRate(0.45);
-      await _tts.setVolume(1.0);
-      await _tts.setPitch(1.0);
-      await _tts.awaitSpeakCompletion(true);
-
-      if (!mounted) return;
-
       setState(() {
         _isSpeaking = true;
       });
 
-      await _tts.speak(_translatedText);
+      final uri = Uri.parse('$_baseUrl/api/tts');
+
+      final response = await http
+          .post(
+            uri,
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({'text': text, 'language': _targetLanguage}),
+          )
+          .timeout(const Duration(seconds: 120));
+
+      if (response.statusCode != 200) {
+        String detail = 'Audio generation failed';
+
+        try {
+          final data = jsonDecode(response.body);
+
+          if (data is Map && data['detail'] != null) {
+            detail = data['detail'].toString();
+          }
+        } catch (_) {
+          detail = 'Audio server error ${response.statusCode}';
+        }
+
+        throw Exception(detail);
+      }
+
+      if (response.bodyBytes.isEmpty) {
+        throw Exception('The audio file is empty.');
+      }
 
       if (!mounted) return;
 
-      setState(() {
-        _isSpeaking = false;
-      });
+      // Play the MP3 returned by Edge TTS.
+      await _audioPlayer.play(BytesSource(response.bodyBytes));
     } catch (error) {
-      debugPrint('TTS error: $error');
+      debugPrint('Edge TTS error: $error');
 
       if (!mounted) return;
 
@@ -333,7 +380,7 @@ $text
   // --------------------------------------------------
 
   Future<void> _clearImage() async {
-    await _tts.stop();
+    await _stopAudio();
 
     if (!mounted) return;
 
@@ -342,7 +389,6 @@ $text
       _imageBytes = null;
       _recognizedText = '';
       _translatedText = '';
-      _isSpeaking = false;
       _isProcessing = false;
       _isTranslating = false;
     });
@@ -356,10 +402,7 @@ $text
     if (!mounted) return;
 
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        behavior: SnackBarBehavior.floating,
-      ),
+      SnackBar(content: Text(message), behavior: SnackBarBehavior.floating),
     );
   }
 
@@ -369,8 +412,8 @@ $text
 
   @override
   void dispose() {
-    _textRecognizer.close();
-    _tts.stop();
+    _audioCompleteSubscription?.cancel();
+    _audioPlayer.dispose();
     super.dispose();
   }
 
@@ -384,7 +427,7 @@ $text
       backgroundColor: const Color(0xFFF5F7FB),
       appBar: AppBar(
         title: const Text('Camera Translation'),
-        backgroundColor: const Color(0xFF356AE6),
+        backgroundColor: _primaryBlue,
         foregroundColor: Colors.white,
       ),
       body: SafeArea(
@@ -410,9 +453,7 @@ $text
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(24),
-                border: Border.all(
-                  color: Colors.black12,
-                ),
+                border: Border.all(color: Colors.black12),
               ),
               child: const Center(
                 child: Column(
@@ -421,7 +462,7 @@ $text
                     Icon(
                       Icons.document_scanner_outlined,
                       size: 80,
-                      color: Color(0xFF356AE6),
+                      color: _primaryBlue,
                     ),
                     SizedBox(height: 16),
                     Text(
@@ -437,9 +478,7 @@ $text
                       child: Text(
                         'Take a photo or select an existing image.',
                         textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: Colors.black54,
-                        ),
+                        style: TextStyle(color: Colors.black54),
                       ),
                     ),
                   ],
@@ -456,11 +495,9 @@ $text
                   icon: const Icon(Icons.camera_alt),
                   label: const Text('Take Photo'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF356AE6),
+                    backgroundColor: _primaryBlue,
                     foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 16,
-                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 16),
                   ),
                 ),
               ),
@@ -471,10 +508,8 @@ $text
                   icon: const Icon(Icons.photo_library),
                   label: const Text('Gallery'),
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: const Color(0xFF356AE6),
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 16,
-                    ),
+                    foregroundColor: _primaryBlue,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
                   ),
                 ),
               ),
@@ -495,9 +530,7 @@ $text
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // --------------------------------------------------
           // SELECTED IMAGE
-          // --------------------------------------------------
 
           Container(
             height: 300,
@@ -512,17 +545,12 @@ $text
                     fit: BoxFit.contain,
                     width: double.infinity,
                   )
-                : const Center(
-                    child: CircularProgressIndicator(),
-                  ),
+                : const Center(child: CircularProgressIndicator()),
           ),
 
           const SizedBox(height: 16),
 
-          // --------------------------------------------------
           // IMAGE ACTIONS
-          // --------------------------------------------------
-
           Row(
             children: [
               Expanded(
@@ -535,8 +563,7 @@ $text
               const SizedBox(width: 12),
               Expanded(
                 child: ElevatedButton.icon(
-                  onPressed:
-                      _isProcessing ? null : _processImage,
+                  onPressed: _isProcessing ? null : _processImage,
                   icon: _isProcessing
                       ? const SizedBox(
                           width: 18,
@@ -546,16 +573,10 @@ $text
                             color: Colors.white,
                           ),
                         )
-                      : const Icon(
-                          Icons.document_scanner,
-                        ),
-                  label: Text(
-                    _isProcessing
-                        ? 'Reading...'
-                        : 'Detect Text',
-                  ),
+                      : const Icon(Icons.document_scanner),
+                  label: Text(_isProcessing ? 'Reading...' : 'Detect Text'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF356AE6),
+                    backgroundColor: _primaryBlue,
                     foregroundColor: Colors.white,
                   ),
                 ),
@@ -563,51 +584,36 @@ $text
             ],
           ),
 
-          // --------------------------------------------------
           // DETECTED TEXT
-          // --------------------------------------------------
-
           if (_recognizedText.isNotEmpty) ...[
             const SizedBox(height: 24),
-
             const Text(
               'Detected text',
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
+                color: _darkBlue,
               ),
             ),
-
             const SizedBox(height: 10),
-
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(18),
-                border: Border.all(
-                  color: Colors.black12,
-                ),
+                border: Border.all(color: Colors.black12),
               ),
               child: SelectableText(
                 _recognizedText,
-                style: const TextStyle(
-                  fontSize: 16,
-                  height: 1.5,
-                ),
+                style: const TextStyle(fontSize: 16, height: 1.5),
               ),
             ),
-
             const SizedBox(height: 16),
 
-            // --------------------------------------------------
             // TRANSLATION BUTTON
-            // --------------------------------------------------
-
             ElevatedButton.icon(
-              onPressed:
-                  _isTranslating ? null : _translateText,
+              onPressed: _isTranslating ? null : _translateText,
               icon: _isTranslating
                   ? const SizedBox(
                       width: 18,
@@ -624,22 +630,16 @@ $text
                     : 'Translate to $_targetLanguage',
               ),
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF356AE6),
+                backgroundColor: _primaryBlue,
                 foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(
-                  vertical: 15,
-                ),
+                padding: const EdgeInsets.symmetric(vertical: 15),
               ),
             ),
           ],
 
-          // --------------------------------------------------
           // TRANSLATED TEXT
-          // --------------------------------------------------
-
           if (_translatedText.isNotEmpty) ...[
             const SizedBox(height: 24),
-
             Row(
               children: [
                 const Expanded(
@@ -648,55 +648,43 @@ $text
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
+                      color: _darkBlue,
                     ),
                   ),
                 ),
                 IconButton(
                   onPressed: _speakTranslation,
-                  tooltip:
-                      _isSpeaking ? 'Stop audio' : 'Listen',
+                  tooltip: _isSpeaking ? 'Stop audio' : 'Listen',
                   icon: Icon(
-                    _isSpeaking
-                        ? Icons.stop_circle
-                        : Icons.volume_up,
-                    color: const Color(0xFF356AE6),
+                    _isSpeaking ? Icons.stop_circle : Icons.volume_up,
+                    color: _primaryBlue,
                     size: 28,
                   ),
                 ),
               ],
             ),
-
             const SizedBox(height: 10),
-
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: const Color(0xFFEAF0FF),
                 borderRadius: BorderRadius.circular(18),
-                border: Border.all(
-                  color: const Color(0xFF356AE6)
-                      .withValues(alpha: 0.25),
-                ),
+                border: Border.all(color: _primaryBlue.withValues(alpha: 0.25)),
               ),
               child: SelectableText(
                 _translatedText,
                 style: const TextStyle(
                   fontSize: 16,
                   height: 1.5,
-                  color: Color(0xFF172B4D),
+                  color: _darkBlue,
                 ),
               ),
             ),
-
             const SizedBox(height: 12),
-
             Text(
               'Translated into $_targetLanguage',
-              style: const TextStyle(
-                fontSize: 12,
-                color: Colors.black54,
-              ),
+              style: const TextStyle(fontSize: 12, color: Colors.black54),
               textAlign: TextAlign.right,
             ),
           ],

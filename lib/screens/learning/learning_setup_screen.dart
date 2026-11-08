@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 
 import '../../services/learning_service.dart';
@@ -7,8 +6,7 @@ class LearningSetupScreen extends StatefulWidget {
   const LearningSetupScreen({super.key});
 
   @override
-  State<LearningSetupScreen> createState() =>
-      _LearningSetupScreenState();
+  State<LearningSetupScreen> createState() => _LearningSetupScreenState();
 }
 
 class _LearningSetupScreenState extends State<LearningSetupScreen> {
@@ -68,8 +66,7 @@ class _LearningSetupScreenState extends State<LearningSetupScreen> {
           _targetLanguage = profile['target_language'] as String;
           _currentLevel = profile['current_level'] as String;
           _learningGoal = profile['learning_goal'] as String;
-          _dailyMinutes =
-              (profile['daily_minutes'] as num).toDouble();
+          _dailyMinutes = (profile['daily_minutes'] as num).toDouble();
         });
       }
     } catch (error) {
@@ -90,11 +87,7 @@ class _LearningSetupScreenState extends State<LearningSetupScreen> {
   Future<void> _saveProfile() async {
     if (_nativeLanguage == _targetLanguage) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Choose two different languages.',
-          ),
-        ),
+        const SnackBar(content: Text('Choose two different languages.')),
       );
       return;
     }
@@ -120,9 +113,7 @@ class _LearningSetupScreenState extends State<LearningSetupScreen> {
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Your learning plan has been saved.'),
-        ),
+        const SnackBar(content: Text('Your learning plan has been saved.')),
       );
 
       Navigator.pop(context, true);
@@ -130,9 +121,7 @@ class _LearningSetupScreenState extends State<LearningSetupScreen> {
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Unable to save your plan: $error'),
-        ),
+        SnackBar(content: Text('Unable to save your plan: $error')),
       );
     } finally {
       if (mounted) {
@@ -160,27 +149,20 @@ class _LearningSetupScreenState extends State<LearningSetupScreen> {
         ),
         const SizedBox(height: 9),
         DropdownButtonFormField<String>(
-        initialValue: value,
+          initialValue: value,
           isExpanded: true,
           decoration: InputDecoration(
             prefixIcon: Icon(icon),
             filled: true,
             fillColor: Colors.white,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(14),
-            ),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(14),
-              borderSide: const BorderSide(
-                color: Color(0xFFE2E8F0),
-              ),
+              borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
             ),
           ),
           items: items.map((item) {
-            return DropdownMenuItem(
-              value: item,
-              child: Text(item),
-            );
+            return DropdownMenuItem(value: item, child: Text(item));
           }).toList(),
           onChanged: onChanged,
         ),
@@ -216,10 +198,7 @@ class _LearningSetupScreenState extends State<LearningSetupScreen> {
                     'Tell us about your language goals. '
                     'We will use this information to personalize '
                     'your learning experience.',
-                    style: TextStyle(
-                      color: Color(0xFF718096),
-                      height: 1.5,
-                    ),
+                    style: TextStyle(color: Color(0xFF718096), height: 1.5),
                   ),
                   const SizedBox(height: 28),
 
@@ -285,9 +264,7 @@ class _LearningSetupScreenState extends State<LearningSetupScreen> {
                     children: [
                       const Text(
                         'Time per day',
-                        style: TextStyle(
-                          color: Color(0xFF718096),
-                        ),
+                        style: TextStyle(color: Color(0xFF718096)),
                       ),
                       Text(
                         '${_dailyMinutes.round()} minutes',

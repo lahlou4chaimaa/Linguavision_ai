@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 
 import '../../services/learning_service.dart';
@@ -29,9 +28,7 @@ class _LearningPlanCardState extends State<LearningPlanCard> {
   Future<void> _openSetup() async {
     final result = await Navigator.push<bool>(
       context,
-      MaterialPageRoute(
-        builder: (_) => const LearningSetupScreen(),
-      ),
+      MaterialPageRoute(builder: (_) => const LearningSetupScreen()),
     );
 
     if (result == true && mounted) {
@@ -52,9 +49,7 @@ class _LearningPlanCardState extends State<LearningPlanCard> {
               color: Colors.white,
               borderRadius: BorderRadius.circular(20),
             ),
-            child: const Center(
-              child: CircularProgressIndicator(),
-            ),
+            child: const Center(child: CircularProgressIndicator()),
           );
         }
 
@@ -74,8 +69,7 @@ class _LearningPlanCardState extends State<LearningPlanCard> {
         if (profile == null) {
           return _buildMessageCard(
             title: 'Your language journey starts here.',
-            description:
-                'Choose your language, level and daily learning goal.',
+            description: 'Choose your language, level and daily learning goal.',
             buttonText: 'Set up my learning plan',
             onPressed: _openSetup,
           );
@@ -92,10 +86,7 @@ class _LearningPlanCardState extends State<LearningPlanCard> {
           padding: const EdgeInsets.all(22),
           decoration: BoxDecoration(
             gradient: const LinearGradient(
-              colors: [
-                Color(0xFF356AE6),
-                Color(0xFF648BEE),
-              ],
+              colors: [Color(0xFF356AE6), Color(0xFF648BEE)],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
@@ -104,11 +95,7 @@ class _LearningPlanCardState extends State<LearningPlanCard> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Icon(
-                Icons.auto_awesome,
-                color: Colors.white,
-                size: 29,
-              ),
+              const Icon(Icons.auto_awesome, color: Colors.white, size: 29),
               const SizedBox(height: 16),
               const Text(
                 'Your learning plan',
@@ -125,17 +112,9 @@ class _LearningPlanCardState extends State<LearningPlanCard> {
                 '$nativeLanguage → $targetLanguage',
               ),
               const SizedBox(height: 12),
-              _infoRow(
-                Icons.signal_cellular_alt,
-                'Current level',
-                level,
-              ),
+              _infoRow(Icons.signal_cellular_alt, 'Current level', level),
               const SizedBox(height: 12),
-              _infoRow(
-                Icons.flag_outlined,
-                'Main goal',
-                goal,
-              ),
+              _infoRow(Icons.flag_outlined, 'Main goal', goal),
               const SizedBox(height: 12),
               _infoRow(
                 Icons.schedule,
@@ -176,21 +155,14 @@ class _LearningPlanCardState extends State<LearningPlanCard> {
       padding: const EdgeInsets.all(22),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
-          colors: [
-            Color(0xFF356AE6),
-            Color(0xFF648BEE),
-          ],
+          colors: [Color(0xFF356AE6), Color(0xFF648BEE)],
         ),
         borderRadius: BorderRadius.circular(22),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(
-            Icons.auto_awesome,
-            color: Colors.white,
-            size: 29,
-          ),
+          const Icon(Icons.auto_awesome, color: Colors.white, size: 29),
           const SizedBox(height: 16),
           Text(
             title,
@@ -203,10 +175,7 @@ class _LearningPlanCardState extends State<LearningPlanCard> {
           const SizedBox(height: 9),
           Text(
             description,
-            style: const TextStyle(
-              color: Colors.white,
-              height: 1.5,
-            ),
+            style: const TextStyle(color: Colors.white, height: 1.5),
           ),
           const SizedBox(height: 20),
           FilledButton(
@@ -234,10 +203,7 @@ class _LearningPlanCardState extends State<LearningPlanCard> {
             children: [
               Text(
                 label,
-                style: const TextStyle(
-                  color: Colors.white70,
-                  fontSize: 12,
-                ),
+                style: const TextStyle(color: Colors.white70, fontSize: 12),
               ),
               const SizedBox(height: 3),
               Text(

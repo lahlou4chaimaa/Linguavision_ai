@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 
 import '../../services/auth_service.dart';
@@ -27,9 +26,7 @@ class HomeScreen extends StatelessWidget {
   void _openCameraTranslation(BuildContext context) {
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => CameraTranslationScreen(),
-      ),
+      MaterialPageRoute(builder: (context) => CameraTranslationScreen()),
     );
   }
 
@@ -38,8 +35,7 @@ class HomeScreen extends StatelessWidget {
     final authService = AuthService();
     final user = authService.currentUser;
 
-    final fullName =
-        user?.userMetadata?['full_name'] as String? ?? 'Learner';
+    final fullName = user?.userMetadata?['full_name'] as String? ?? 'Learner';
 
     return Scaffold(
       backgroundColor: backgroundColor,
@@ -60,30 +56,20 @@ class HomeScreen extends StatelessWidget {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(
-                  builder: (_) => const ProfileScreen(),
-                ),
+                MaterialPageRoute(builder: (_) => const ProfileScreen()),
               );
             },
-            icon: const Icon(
-              Icons.account_circle_outlined,
-              color: darkBlue,
-            ),
+            icon: const Icon(Icons.account_circle_outlined, color: darkBlue),
           ),
           IconButton(
             tooltip: 'Settings',
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(
-                  builder: (_) => const SettingsScreen(),
-                ),
+                MaterialPageRoute(builder: (_) => const SettingsScreen()),
               );
             },
-            icon: const Icon(
-              Icons.settings_outlined,
-              color: darkBlue,
-            ),
+            icon: const Icon(Icons.settings_outlined, color: darkBlue),
           ),
           IconButton(
             tooltip: 'Logout',
@@ -94,16 +80,11 @@ class HomeScreen extends StatelessWidget {
                 if (!context.mounted) return;
 
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Unable to log out.'),
-                  ),
+                  const SnackBar(content: Text('Unable to log out.')),
                 );
               }
             },
-            icon: const Icon(
-              Icons.logout,
-              color: darkBlue,
-            ),
+            icon: const Icon(Icons.logout, color: darkBlue),
           ),
         ],
       ),
@@ -125,10 +106,7 @@ class HomeScreen extends StatelessWidget {
               const SizedBox(height: 7),
               const Text(
                 'Ready to improve your language skills today?',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Color(0xFF718096),
-                ),
+                style: TextStyle(fontSize: 14, color: Color(0xFF718096)),
               ),
 
               const SizedBox(height: 25),
@@ -193,8 +171,7 @@ class HomeScreen extends StatelessWidget {
               _FeatureCard(
                 icon: Icons.smart_toy_outlined,
                 title: 'AI Tutor',
-                description:
-                    'Practice conversations with your AI assistant.',
+                description: 'Practice conversations with your AI assistant.',
                 color: const Color(0xFFE9EEFF),
                 iconColor: primaryBlue,
                 onTap: () {
@@ -210,19 +187,16 @@ class HomeScreen extends StatelessWidget {
               _FeatureCard(
                 icon: Icons.mic_none_rounded,
                 title: 'Speaking Practice',
-                description:
-                    'Improve your pronunciation and fluency.',
+                description: 'Improve your pronunciation and fluency.',
                 color: const Color(0xFFE5F6F0),
                 iconColor: const Color(0xFF1C9B70),
-                onTap: () =>
-                    _showComingSoon(context, 'Speaking Practice'),
+                onTap: () => _showComingSoon(context, 'Speaking Practice'),
               ),
 
               _FeatureCard(
                 icon: Icons.camera_alt_outlined,
                 title: 'Camera Translation',
-                description:
-                    'Translate text directly from your photos.',
+                description: 'Translate text directly from your photos.',
                 color: const Color(0xFFFFF2E5),
                 iconColor: const Color(0xFFE58A2B),
                 onTap: () => _openCameraTranslation(context),
@@ -231,8 +205,7 @@ class HomeScreen extends StatelessWidget {
               _FeatureCard(
                 icon: Icons.style_outlined,
                 title: 'My Vocabulary',
-                description:
-                    'Save words and revise them with flashcards.',
+                description: 'Save words and revise them with flashcards.',
                 color: const Color(0xFFF2EAFE),
                 iconColor: const Color(0xFF8B5CC7),
                 onTap: () => _showComingSoon(context, 'My Vocabulary'),
@@ -241,8 +214,7 @@ class HomeScreen extends StatelessWidget {
               _FeatureCard(
                 icon: Icons.location_on_outlined,
                 title: 'GPS Challenges',
-                description:
-                    'Learn through real-life location challenges.',
+                description: 'Learn through real-life location challenges.',
                 color: const Color(0xFFE5F1FC),
                 iconColor: const Color(0xFF2583C7),
                 onTap: () => _showComingSoon(context, 'GPS Challenges'),
@@ -269,24 +241,15 @@ class _StatCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(
-        vertical: 16,
-        horizontal: 8,
-      ),
+      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: const Color(0xFFE8EDF5),
-        ),
+        border: Border.all(color: const Color(0xFFE8EDF5)),
       ),
       child: Column(
         children: [
-          Icon(
-            icon,
-            color: HomeScreen.primaryBlue,
-            size: 25,
-          ),
+          Icon(icon, color: HomeScreen.primaryBlue, size: 25),
           const SizedBox(height: 10),
           Text(
             value,
@@ -300,10 +263,7 @@ class _StatCard extends StatelessWidget {
           Text(
             label,
             textAlign: TextAlign.center,
-            style: const TextStyle(
-              fontSize: 11,
-              color: Color(0xFF718096),
-            ),
+            style: const TextStyle(fontSize: 11, color: Color(0xFF718096)),
           ),
         ],
       ),
@@ -336,15 +296,10 @@ class _FeatureCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 12),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
-        side: const BorderSide(
-          color: Color(0xFFE8EDF5),
-        ),
+        side: const BorderSide(color: Color(0xFFE8EDF5)),
       ),
       child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 15,
-          vertical: 9,
-        ),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 9),
         leading: Container(
           width: 48,
           height: 48,
@@ -352,11 +307,7 @@ class _FeatureCard extends StatelessWidget {
             color: color,
             borderRadius: BorderRadius.circular(13),
           ),
-          child: Icon(
-            icon,
-            color: iconColor,
-            size: 25,
-          ),
+          child: Icon(icon, color: iconColor, size: 25),
         ),
         title: Text(
           title,
@@ -369,10 +320,7 @@ class _FeatureCard extends StatelessWidget {
           padding: const EdgeInsets.only(top: 5),
           child: Text(
             description,
-            style: const TextStyle(
-              fontSize: 12,
-              color: Color(0xFF718096),
-            ),
+            style: const TextStyle(fontSize: 12, color: Color(0xFF718096)),
           ),
         ),
         trailing: const Icon(

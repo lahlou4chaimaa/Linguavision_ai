@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 
 import '../../services/auth_service.dart';
@@ -44,17 +43,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Profile updated successfully.'),
-        ),
+        const SnackBar(content: Text('Profile updated successfully.')),
       );
     } catch (error) {
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Unable to update your profile.'),
-        ),
+        const SnackBar(content: Text('Unable to update your profile.')),
       );
     } finally {
       if (mounted) {
@@ -68,9 +63,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final user = _authService.currentUser;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('My Profile'),
-      ),
+      appBar: AppBar(title: const Text('My Profile')),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
         child: Form(

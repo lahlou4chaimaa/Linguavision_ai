@@ -1,4 +1,3 @@
-
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
@@ -27,26 +26,20 @@ class AiTutorService {
       // Récupération du profil linguistique depuis Supabase.
       final profile = await _learningService.getLearningProfile();
 
-      final nativeLanguage =
-          profile?['native_language'] ?? 'French';
+      final nativeLanguage = profile?['native_language'] ?? 'French';
 
-      final targetLanguage =
-          profile?['target_language'] ?? 'English';
+      final targetLanguage = profile?['target_language'] ?? 'English';
 
-      final level =
-          profile?['current_level'] ?? 'A1';
+      final level = profile?['current_level'] ?? 'A1';
 
-      final learningGoal =
-          profile?['learning_goal'] ?? 'Daily communication';
+      final learningGoal = profile?['learning_goal'] ?? 'Daily communication';
 
       final uri = Uri.parse('$_baseUrl/api/tutor/chat');
 
       final response = await http
           .post(
             uri,
-            headers: {
-              'Content-Type': 'application/json',
-            },
+            headers: {'Content-Type': 'application/json'},
             body: jsonEncode({
               'message': message,
               'native_language': nativeLanguage,
@@ -64,9 +57,7 @@ class AiTutorService {
         return data['reply'] as String;
       }
 
-      throw Exception(
-        'Server error ${response.statusCode}: ${response.body}',
-      );
+      throw Exception('Server error ${response.statusCode}: ${response.body}');
     } catch (error) {
       throw Exception('Unable to contact the AI Tutor: $error');
     }

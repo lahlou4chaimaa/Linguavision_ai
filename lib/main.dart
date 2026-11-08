@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -10,9 +9,7 @@ Future<void> main() async {
 
   await Supabase.initialize(
     url: 'https://nolfrvtsazvgbnmptvkm.supabase.co',
-    publishableKey: const String.fromEnvironment(
-      'SUPABASE_PUBLISHABLE_KEY',
-    ),
+    publishableKey: const String.fromEnvironment('SUPABASE_PUBLISHABLE_KEY'),
   );
 
   runApp(const LinguaVisionApp());
@@ -28,16 +25,12 @@ class LinguaVisionApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF356AE6),
-        ),
+        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF356AE6)),
         scaffoldBackgroundColor: const Color(0xFFF7F9FE),
         inputDecorationTheme: InputDecorationTheme(
           filled: true,
           fillColor: Colors.white,
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(14),
-          ),
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
         ),
       ),
       home: const AuthGate(),

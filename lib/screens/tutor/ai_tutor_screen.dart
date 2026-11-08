@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 
 import '../../services/ai_tutor_service.dart';
@@ -12,20 +11,14 @@ class TutorMessage {
   final bool isUser;
   final DateTime time;
 
-  TutorMessage({
-    required this.text,
-    required this.isUser,
-    DateTime? time,
-  }) : time = time ?? DateTime.now();
+  TutorMessage({required this.text, required this.isUser, DateTime? time})
+    : time = time ?? DateTime.now();
 }
 
 class AiTutorScreen extends StatefulWidget {
   final String? conversationId;
 
-  const AiTutorScreen({
-    super.key,
-    this.conversationId,
-  });
+  const AiTutorScreen({super.key, this.conversationId});
 
   @override
   State<AiTutorScreen> createState() => _AiTutorScreenState();
@@ -34,18 +27,15 @@ class AiTutorScreen extends StatefulWidget {
 class _AiTutorScreenState extends State<AiTutorScreen> {
   // CONTROLLERS
 
-  final TextEditingController _messageController =
-      TextEditingController();
+  final TextEditingController _messageController = TextEditingController();
 
-  final ScrollController _scrollController =
-      ScrollController();
+  final ScrollController _scrollController = ScrollController();
 
   // SERVICES
 
   final AiTutorService _aiTutorService = AiTutorService();
 
-  final TutorHistoryService _historyService =
-      TutorHistoryService();
+  final TutorHistoryService _historyService = TutorHistoryService();
 
   final SpeechService _speechService = SpeechService();
 
@@ -53,8 +43,7 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
 
   final List<TutorMessage> _messages = [
     TutorMessage(
-      text:
-          "Hello! I'm your language tutor. What would you like to practice today?",
+      text: "Hello! I'm your language tutor. What would you like to practice today?",
       isUser: false,
     ),
   ];
@@ -207,11 +196,8 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
             _speechText = text;
             _messageController.text = text;
 
-            _messageController.selection =
-                TextSelection.fromPosition(
-              TextPosition(
-                offset: text.length,
-              ),
+            _messageController.selection = TextSelection.fromPosition(
+              TextPosition(offset: text.length),
             );
 
             if (isFinal) {
@@ -272,9 +258,9 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
             TutorMessage(
               text: item['content'] as String,
               isUser: item['role'] == 'user',
-              time: DateTime.tryParse(
-                    item['created_at']?.toString() ?? '',
-                  )?.toLocal() ??
+              time:
+                  DateTime.tryParse(item['created_at']?.toString() ?? '')
+                      ?.toLocal() ??
                   DateTime.now(),
             ),
           );
@@ -292,9 +278,7 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Unable to load conversation: $error'),
-        ),
+        SnackBar(content: Text('Unable to load conversation: $error')),
       );
     }
   }
@@ -310,9 +294,7 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
         ? '${firstMessage.substring(0, 45)}...'
         : firstMessage;
 
-    final id = await _historyService.createConversation(
-      title: title,
-    );
+    final id = await _historyService.createConversation(title: title);
 
     _conversationId = id;
 
@@ -348,12 +330,7 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
     }).toList();
 
     setState(() {
-      _messages.add(
-        TutorMessage(
-          text: text,
-          isUser: true,
-        ),
-      );
+      _messages.add(TutorMessage(text: text, isUser: true));
 
       _messageController.clear();
       _speechText = '';
@@ -401,12 +378,7 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
       if (!mounted) return;
 
       setState(() {
-        _messages.add(
-          TutorMessage(
-            text: reply,
-            isUser: false,
-          ),
-        );
+        _messages.add(TutorMessage(text: reply, isUser: false));
       });
 
       _scrollToBottom();
@@ -498,9 +470,7 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
   void _openVideoTutor() {
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => const VideoTutorScreen(),
-      ),
+      MaterialPageRoute(builder: (context) => const VideoTutorScreen()),
     );
   }
 
@@ -519,10 +489,7 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
             CircleAvatar(
               radius: 19,
               backgroundColor: Color(0xFFE8F0FF),
-              child: Icon(
-                Icons.smart_toy_outlined,
-                color: Color(0xFF3478F6),
-              ),
+              child: Icon(Icons.smart_toy_outlined, color: Color(0xFF3478F6)),
             ),
             SizedBox(width: 10),
             Column(
@@ -530,17 +497,11 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
               children: [
                 Text(
                   'AI Tutor',
-                  style: TextStyle(
-                    fontSize: 17,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
                 ),
                 Text(
                   'Your personal language partner',
-                  style: TextStyle(
-                    fontSize: 11,
-                    color: Colors.grey,
-                  ),
+                  style: TextStyle(fontSize: 11, color: Colors.grey),
                 ),
               ],
             ),
@@ -552,9 +513,7 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(
-                  builder: (_) => const TutorHistoryScreen(),
-                ),
+                MaterialPageRoute(builder: (_) => const TutorHistoryScreen()),
               );
             },
             icon: const Icon(Icons.history),
@@ -573,9 +532,7 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
           Expanded(
             child: _isLoadingHistory
                 ? const Center(
-                    child: CircularProgressIndicator(
-                      color: Color(0xFF3478F6),
-                    ),
+                    child: CircularProgressIndicator(color: Color(0xFF3478F6)),
                   )
                 : ListView.builder(
                     controller: _scrollController,
@@ -601,18 +558,11 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
   Widget _buildLanguageHeader() {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(
-        horizontal: 18,
-        vertical: 13,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 13),
       color: Colors.white,
       child: const Row(
         children: [
-          Icon(
-            Icons.language,
-            color: Color(0xFF3478F6),
-            size: 20,
-          ),
+          Icon(Icons.language, color: Color(0xFF3478F6), size: 20),
           SizedBox(width: 8),
           Text(
             'Personalized language practice',
@@ -622,11 +572,7 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
             ),
           ),
           Spacer(),
-          Icon(
-            Icons.auto_awesome,
-            color: Color(0xFF3478F6),
-            size: 18,
-          ),
+          Icon(Icons.auto_awesome, color: Color(0xFF3478F6), size: 18),
         ],
       ),
     );
@@ -636,22 +582,15 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
 
   Widget _buildMessage(TutorMessage message) {
     return Align(
-      alignment: message.isUser
-          ? Alignment.centerRight
-          : Alignment.centerLeft,
+      alignment: message.isUser ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
         constraints: BoxConstraints(
           maxWidth: MediaQuery.of(context).size.width * 0.78,
         ),
         margin: const EdgeInsets.only(bottom: 14),
-        padding: const EdgeInsets.symmetric(
-          horizontal: 15,
-          vertical: 12,
-        ),
+        padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
         decoration: BoxDecoration(
-          color: message.isUser
-              ? const Color(0xFF3478F6)
-              : Colors.white,
+          color: message.isUser ? const Color(0xFF3478F6) : Colors.white,
           borderRadius: BorderRadius.only(
             topLeft: const Radius.circular(17),
             topRight: const Radius.circular(17),
@@ -672,9 +611,7 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
             Text(
               message.text,
               style: TextStyle(
-                color: message.isUser
-                    ? Colors.white
-                    : const Color(0xFF253858),
+                color: message.isUser ? Colors.white : const Color(0xFF253858),
                 fontSize: 14,
                 height: 1.5,
               ),
@@ -714,13 +651,8 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
             ),
             const SizedBox(width: 10),
             Text(
-              _isSaving
-                  ? 'Saving your message...'
-                  : 'Tutor is thinking...',
-              style: const TextStyle(
-                color: Colors.grey,
-                fontSize: 12,
-              ),
+              _isSaving ? 'Saving your message...' : 'Tutor is thinking...',
+              style: const TextStyle(color: Colors.grey, fontSize: 12),
             ),
           ],
         ),
@@ -735,11 +667,7 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
       padding: const EdgeInsets.fromLTRB(12, 12, 12, 18),
       decoration: const BoxDecoration(
         color: Colors.white,
-        border: Border(
-          top: BorderSide(
-            color: Color(0xFFEAEFF5),
-          ),
-        ),
+        border: Border(top: BorderSide(color: Color(0xFFEAEFF5))),
       ),
       child: SafeArea(
         top: false,
@@ -760,17 +688,11 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
                 ),
                 child: Row(
                   children: [
-                    const Icon(
-                      Icons.mic,
-                      size: 18,
-                      color: Colors.red,
-                    ),
+                    const Icon(Icons.mic, size: 18, color: Colors.red),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        _speechText.isEmpty
-                            ? 'Listening...'
-                            : _speechText,
+                        _speechText.isEmpty ? 'Listening...' : _speechText,
                         style: const TextStyle(
                           color: Color(0xFF7A2525),
                           fontSize: 13,
@@ -789,9 +711,7 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
                     _isListening
                         ? Icons.stop_circle_outlined
                         : Icons.mic_none_rounded,
-                    color: _isListening
-                        ? Colors.red
-                        : const Color(0xFF3478F6),
+                    color: _isListening ? Colors.red : const Color(0xFF3478F6),
                   ),
                 ),
                 Expanded(

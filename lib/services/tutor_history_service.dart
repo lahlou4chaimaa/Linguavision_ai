@@ -1,4 +1,3 @@
-
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class TutorHistoryService {
@@ -15,15 +14,10 @@ class TutorHistoryService {
   }
 
   // Create a new conversation
-  Future<String> createConversation({
-    String title = 'New conversation',
-  }) async {
+  Future<String> createConversation({String title = 'New conversation'}) async {
     final result = await _supabase
         .from('tutor_conversations')
-        .insert({
-          'user_id': _userId,
-          'title': title,
-        })
+        .insert({'user_id': _userId, 'title': title})
         .select('id')
         .single();
 
@@ -49,9 +43,7 @@ class TutorHistoryService {
 
     await _supabase
         .from('tutor_conversations')
-        .update({
-          'updated_at': DateTime.now().toUtc().toIso8601String(),
-        })
+        .update({'updated_at': DateTime.now().toUtc().toIso8601String()})
         .eq('id', conversationId)
         .eq('user_id', _userId);
   }
@@ -68,9 +60,7 @@ class TutorHistoryService {
   }
 
   // Get messages from one conversation
-  Future<List<Map<String, dynamic>>> getMessages(
-    String conversationId,
-  ) async {
+  Future<List<Map<String, dynamic>>> getMessages(String conversationId) async {
     final result = await _supabase
         .from('tutor_messages')
         .select()

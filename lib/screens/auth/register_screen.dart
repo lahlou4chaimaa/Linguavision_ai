@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -74,10 +73,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   void _showMessage(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        behavior: SnackBarBehavior.floating,
-      ),
+      SnackBar(content: Text(message), behavior: SnackBarBehavior.floating),
     );
   }
 
@@ -101,16 +97,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 25,
-              vertical: 20,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 20),
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 430),
               child: Form(
                 key: _formKey,
                 child: Column(
-                  
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     Align(
@@ -146,10 +138,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     const Text(
                       'Start your language learning journey with us.',
                       textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Color(0xFF718096),
-                      ),
+                      style: TextStyle(fontSize: 14, color: Color(0xFF718096)),
                     ),
 
                     const SizedBox(height: 35),
@@ -194,9 +183,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           return 'Please enter your email.';
                         }
 
-                        if (!RegExp(
-                          r'^[^@\s]+@[^@\s]+\.[^@\s]+$',
-                        ).hasMatch(email)) {
+                        if (!RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$')
+                            .hasMatch(email)) {
                           return 'Please enter a valid email.';
                         }
 
@@ -303,9 +291,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       children: [
                         const Text(
                           'Already have an account? ',
-                          style: TextStyle(
-                            color: Color(0xFF718096),
-                          ),
+                          style: TextStyle(color: Color(0xFF718096)),
                         ),
                         TextButton(
                           onPressed: () => Navigator.pop(context),

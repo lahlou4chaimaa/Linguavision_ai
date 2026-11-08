@@ -1,4 +1,3 @@
-
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 
@@ -6,8 +5,7 @@ class VideoTutorScreen extends StatefulWidget {
   const VideoTutorScreen({super.key});
 
   @override
-  State<VideoTutorScreen> createState() =>
-      _VideoTutorScreenState();
+  State<VideoTutorScreen> createState() => _VideoTutorScreenState();
 }
 
 class _VideoTutorScreenState extends State<VideoTutorScreen> {
@@ -38,12 +36,12 @@ class _VideoTutorScreenState extends State<VideoTutorScreen> {
       }
 
       final frontCamera = cameras.where(
-        (camera) =>
-            camera.lensDirection == CameraLensDirection.front,
+        (camera) => camera.lensDirection == CameraLensDirection.front,
       );
 
-      final selectedCamera =
-          frontCamera.isNotEmpty ? frontCamera.first : cameras.first;
+      final selectedCamera = frontCamera.isNotEmpty
+          ? frontCamera.first
+          : cameras.first;
 
       final controller = CameraController(
         selectedCamera,
@@ -135,18 +133,12 @@ class _VideoTutorScreenState extends State<VideoTutorScreen> {
 
   Widget _buildHeader() {
     return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 20,
-        vertical: 16,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       child: Row(
         children: [
           IconButton(
             onPressed: () => Navigator.pop(context),
-            icon: const Icon(
-              Icons.arrow_back,
-              color: Colors.white,
-            ),
+            icon: const Icon(Icons.arrow_back, color: Colors.white),
           ),
           const SizedBox(width: 8),
           const Expanded(
@@ -163,19 +155,12 @@ class _VideoTutorScreenState extends State<VideoTutorScreen> {
                 ),
                 Text(
                   'Your personal AI conversation partner',
-                  style: TextStyle(
-                    color: Colors.white54,
-                    fontSize: 11,
-                  ),
+                  style: TextStyle(color: Colors.white54, fontSize: 11),
                 ),
               ],
             ),
           ),
-          const Icon(
-            Icons.circle,
-            color: Colors.greenAccent,
-            size: 9,
-          ),
+          const Icon(Icons.circle, color: Colors.greenAccent, size: 9),
           const SizedBox(width: 6),
           const Text(
             'LIVE',
@@ -199,11 +184,7 @@ class _VideoTutorScreenState extends State<VideoTutorScreen> {
         gradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
-            Color(0xFF182D50),
-            Color(0xFF101A30),
-            Color(0xFF080D19),
-          ],
+          colors: [Color(0xFF182D50), Color(0xFF101A30), Color(0xFF080D19)],
         ),
       ),
       child: Column(
@@ -215,10 +196,7 @@ class _VideoTutorScreenState extends State<VideoTutorScreen> {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: Colors.white.withValues(alpha: 0.07),
-              border: Border.all(
-                color: Colors.white24,
-                width: 1.5,
-              ),
+              border: Border.all(color: Colors.white24, width: 1.5),
             ),
             child: const Icon(
               Icons.face_3_rounded,
@@ -242,29 +220,20 @@ class _VideoTutorScreenState extends State<VideoTutorScreen> {
 
           const Text(
             'Your realistic digital companion',
-            style: TextStyle(
-              color: Colors.white60,
-              fontSize: 13,
-            ),
+            style: TextStyle(color: Colors.white60, fontSize: 13),
           ),
 
           const SizedBox(height: 20),
 
           Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 9,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 9),
             decoration: BoxDecoration(
               color: Colors.white.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(30),
             ),
             child: const Text(
               '3D avatar integration coming next',
-              style: TextStyle(
-                color: Color(0xFFB8CCF5),
-                fontSize: 11,
-              ),
+              style: TextStyle(color: Color(0xFFB8CCF5), fontSize: 11),
             ),
           ),
         ],
@@ -279,69 +248,41 @@ class _VideoTutorScreenState extends State<VideoTutorScreen> {
       decoration: BoxDecoration(
         color: const Color(0xFF202B40),
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(
-          color: Colors.white38,
-          width: 1.5,
-        ),
+        border: Border.all(color: Colors.white38, width: 1.5),
       ),
       clipBehavior: Clip.antiAlias,
       child: !_cameraEnabled
           ? const Center(
-              child: Icon(
-                Icons.videocam_off,
-                color: Colors.white70,
-                size: 30,
-              ),
+              child: Icon(Icons.videocam_off, color: Colors.white70, size: 30),
             )
           : _isInitializing
-              ? const Center(
-                  child: CircularProgressIndicator(),
-                )
-              : _cameraError != null
-                  ? const Center(
-                      child: Icon(
-                        Icons.error_outline,
-                        color: Colors.white70,
-                        size: 30,
-                      ),
-                    )
-                  : _cameraController != null &&
-                          _cameraController!.value.isInitialized
-                      ? CameraPreview(_cameraController!)
-                      : const Center(
-                          child: Icon(
-                            Icons.person,
-                            color: Colors.white70,
-                            size: 35,
-                          ),
-                        ),
+          ? const Center(child: CircularProgressIndicator())
+          : _cameraError != null
+          ? const Center(
+              child: Icon(Icons.error_outline, color: Colors.white70, size: 30),
+            )
+          : _cameraController != null && _cameraController!.value.isInitialized
+          ? CameraPreview(_cameraController!)
+          : const Center(
+              child: Icon(Icons.person, color: Colors.white70, size: 35),
+            ),
     );
   }
 
   Widget _buildConversationStatus() {
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 13,
-        vertical: 9,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 9),
       decoration: BoxDecoration(
         color: Colors.black.withValues(alpha: 0.35),
         borderRadius: BorderRadius.circular(20),
       ),
       child: const Row(
         children: [
-          Icon(
-            Icons.graphic_eq,
-            color: Color(0xFF82A9FF),
-            size: 18,
-          ),
+          Icon(Icons.graphic_eq, color: Color(0xFF82A9FF), size: 18),
           SizedBox(width: 8),
           Text(
             'Ready to talk',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 12,
-            ),
+            style: TextStyle(color: Colors.white, fontSize: 12),
           ),
         ],
       ),
@@ -355,9 +296,7 @@ class _VideoTutorScreenState extends State<VideoTutorScreen> {
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
           _controlButton(
-            icon: _cameraEnabled
-                ? Icons.videocam
-                : Icons.videocam_off,
+            icon: _cameraEnabled ? Icons.videocam : Icons.videocam_off,
             label: 'Camera',
             onPressed: _toggleCamera,
           ),
@@ -402,10 +341,7 @@ class _VideoTutorScreenState extends State<VideoTutorScreen> {
         const SizedBox(height: 7),
         Text(
           label,
-          style: const TextStyle(
-            color: Colors.white70,
-            fontSize: 11,
-          ),
+          style: const TextStyle(color: Colors.white70, fontSize: 11),
         ),
       ],
     );

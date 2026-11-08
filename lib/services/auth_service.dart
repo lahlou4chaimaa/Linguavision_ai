@@ -1,4 +1,3 @@
-
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class AuthService {
@@ -12,9 +11,7 @@ class AuthService {
     return await _supabase.auth.signUp(
       email: email.trim(),
       password: password,
-      data: {
-        'full_name': fullName.trim(),
-      },
+      data: {'full_name': fullName.trim()},
     );
   }
 
@@ -32,23 +29,16 @@ class AuthService {
     await _supabase.auth.signOut();
   }
 
-
   // Modifier le nom de l'utilisateur
   Future<void> updateFullName(String fullName) async {
     await _supabase.auth.updateUser(
-      UserAttributes(
-        data: {
-          'full_name': fullName.trim(),
-        },
-      ),
+      UserAttributes(data: {'full_name': fullName.trim()}),
     );
   }
 
   // Modifier le mot de passe
   Future<void> updatePassword(String newPassword) async {
-    await _supabase.auth.updateUser(
-      UserAttributes(password: newPassword),
-    );
+    await _supabase.auth.updateUser(UserAttributes(password: newPassword));
   }
 
   User? get currentUser => _supabase.auth.currentUser;
